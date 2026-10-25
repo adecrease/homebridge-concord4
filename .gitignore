@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-test/
+concord4-equipment.json
+*.log
+.DS_Store

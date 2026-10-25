@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Concord 4 Alarm Configuration</title>
+  <style>
+    :root {
+      --c4-border: rgba(128, 128, 128, 0.25);
+      --c4-bg-subtle: rgba(128, 128, 128, 0.06);
+      --c4-text-muted: #888;
+    }
+    body {
+      margin: 0;
+      padding: 0 0 12px 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+    }
+    .c4-card {
+      border: 1px solid var(--c4-border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: var(--c4-bg-subtle);
+    }
+    .c4-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .c4-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .c4-meta {
+      font-size: 12px;
+      color: var(--c4-text-muted);
+      margin-top: 2px;
+    }
+    .c4-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 16px;
+      margin-bottom: 12px;
+    }
+    .c4-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .c4-label {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .c4-help {
+      font-size: 11px;
+      color: var(--c4-text-muted);
+      line-height: 1.35;
+    }
+    .c4-checks {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--c4-border);
+    }
+    .c4-check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .c4-check-row input[type="checkbox"] {
+      margin-top: 2px;
+    }
+    .c4-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .c4-btn {
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 5px;
+      border: 1px solid var(--c4-border);
+      background: rgba(128, 128, 128, 0.14);
+      color: inherit;
+      cursor: pointer;
+    }
+    .c4-btn:hover {
+      background: rgba(128, 128, 128, 0.25);
+    }
+    .c4-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .c4-badge-ok {
+      background: rgba(46, 125, 50, 0.2);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.4);
+    }
+    .c4-badge-warn {
+      background: rgba(239, 108, 0, 0.2);
+      color: #ff9800;
+      border: 1px solid rgba(255, 152, 0, 0.4);
+    }
+    .c4-badge-danger {
+      background: rgba(198, 40, 40, 0.2);
+      color: #f44336;
+      border: 1px solid rgba(244, 67, 54, 0.4);
+    }
+    .c4-badge-info {
+      background: rgba(25, 118, 210, 0.18);
+      color: #42a5f5;
+      border: 1px solid rgba(66, 165, 245, 0.35);
+    }
+    .c4-section-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--c4-text-muted);
+      margin: 12px 0 6px 0;
+    }
+    .c4-table-wrap {
+      overflow-x: auto;
+    }
+    table.c4-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    table.c4-table th,
+    table.c4-table td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--c4-border);
+      vertical-align: middle;
+    }
+    table.c4-table th {
+      font-weight: 600;
+      color: var(--c4-text-muted);
+      font-size: 11.5px;
+    }
+    .c4-input,
+    .c4-select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      font-size: 12.5px;
+      border: 1px solid var(--c4-border);
+      border-radius: 4px;
+      background: rgba(128, 128, 128, 0.08);
+      color: inherit;
+    }
+    .c4-empty {
+      padding: 16px;
+      text-align: center;
+      color: var(--c4-text-muted);
+      border: 1px dashed var(--c4-border);
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 1. Top Card: Platform & Connection Settings -->
+  <div class="c4-card">
+    <div class="c4-header">
+      <div>
+        <div class="c4-title">Platform &amp; Connection Settings</div>
+        <div class="c4-meta">Configure how Homebridge connects to your SuperBus 2000 RS-232 Automation Module.</div>
+      </div>
+    </div>
+
+    <div class="c4-grid">
+      <div class="c4-field">
+        <label class="c4-label" for="cfgName">Platform Name *</label>
+        <input id="cfgName" type="text" class="c4-input" placeholder="Concord 4 Alarm" required />
+      </div>
+
+      <div class="c4-field">
+        <label class="c4-label" for="cfgConnectionType">Connection Type *</label>
+        <select id="cfgConnectionType" class="c4-select">
+          <option value="serial">Local Serial Port (USB / RS-232)</option>
+          <option value="tcp">Network TCP Socket (ser2net / IP-to-Serial)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Serial Fields -->
+    <div id="serialFields" class="c4-grid">
+      <div class="c4-field">
+        <label class="c4-label" for="cfgSerialPort">Serial Port Path</label>
+        <input
+          id="cfgSerialPort"
+          type="text"
+          list="serialPortList"
+          class="c4-input"
+          placeholder="/dev/tty.usbserial-AB0N4F64"
+        />
+        <datalist id="serialPortList"></datalist>
+        <div class="c4-help">Path to the RS-232 serial device (e.g., /dev/ttyUSB0 or /dev/tty.usbserial-xxxx).</div>
+      </div>
+
+      <div class="c4-field">
+        <label class="c4-label" for="cfgBaudRate">Baud Rate</label>
+        <input id="cfgBaudRate" type="number" class="c4-input" value="9600" />
+        <div class="c4-help">SuperBus 2000 RS-232 modules operate at 9600 baud (8 data bits, Odd parity, 1 stop bit).</div>
+      </div>
+    </div>
+
+    <!-- TCP Fields -->
+    <div id="tcpFields" class="c4-grid" style="display: none;">
+      <div class="c4-field">
+        <label class="c4-label" for="cfgTcpHost">TCP Host / IP Address</label>
+        <input id="cfgTcpHost" type="text" class="c4-input" placeholder="192.168.1.50" />
+        <div class="c4-help">Hostname or IP address of the serial-to-IP bridge (e.g., ser2net).</div>
+      </div>
+
+      <div class="c4-field">
+        <label class="c4-label" for="cfgTcpPort">TCP Port</label>
+        <input id="cfgTcpPort" type="number" class="c4-input" value="2000" min="1" max="65535" />
+        <div class="c4-help">TCP port of the serial-to-IP bridge.</div>
+      </div>
+    </div>
+
+    <!-- PIN Code -->
+    <div class="c4-grid">
+      <div class="c4-field">
+        <label class="c4-label" for="cfgPinCode">User / Master PIN Code (Optional)</label>
+        <input id="cfgPinCode" type="password" class="c4-input" placeholder="1234" autocomplete="off" />
+        <div class="c4-help">Optional 4-digit PIN code used when 'Use PIN Code Instead of Keyfob Commands' is enabled.</div>
+      </div>
+    </div>
+
+    <!-- Checkboxes -->
+    <div class="c4-checks">
+      <label class="c4-check-row">
+        <input id="cfgUsePinForArming" type="checkbox" />
+        <div>
+          <div class="c4-label">Use PIN Code Instead of Keyfob Commands</div>
+          <div class="c4-help">When unchecked (default), uses Concord's direct Keyfob Arm/Disarm commands (0x20, 0x27, 0x28). Enable if your panel requires a PIN sequence.</div>
+        </div>
+      </label>
+
+      <label class="c4-check-row">
+        <input id="cfgAutoDiscoverZones" type="checkbox" checked />
+        <div>
+          <div class="c4-label">Auto-Discover Zones</div>
+          <div class="c4-help">Automatically expose panel zones and infer their HomeKit sensor type from the panel's zone group and name.</div>
+        </div>
+      </label>
+
+      <label class="c4-check-row">
+        <input id="cfgDebugProtocol" type="checkbox" />
+        <div>
+          <div class="c4-label">Log Raw RS-232 Frames (Debug)</div>
+          <div class="c4-help">Log raw hex frames sent and received over the RS-232 interface.</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <!-- 2. Bottom Card: Discovered Equipment -->
+  <div class="c4-card">
+    <div class="c4-header">
+      <div>
+        <div class="c4-title">
+          <span>Discovered Concord 4 Equipment</span>
+          <span id="connBadge" class="c4-badge c4-badge-warn">Checking...</span>
+        </div>
+        <div id="connMeta" class="c4-meta">Loading equipment snapshot from Homebridge...</div>
+      </div>
+      <div class="c4-actions">
+        <button id="refreshBtn" type="button" class="c4-btn">Refresh</button>
+      </div>
+    </div>
+
+    <div id="emptyState" class="c4-empty" style="display: none;">
+      No panel equipment snapshot found yet. Save your serial/TCP settings above and restart the Concord4 bridge—once the panel completes its Equipment List sync, your partitions and zones will appear here automatically.
+    </div>
+
+    <div id="equipmentContent" style="display: none;">
+      <div class="c4-section-label">Partitions (<span id="partitionCount">0</span>)</div>
+      <div class="c4-table-wrap">
+        <table class="c4-table">
+          <thead>
+            <tr>
+              <th style="width: 55px;">Part #</th>
+              <th>Panel Name</th>
+              <th>Panel State</th>
+              <th>Custom HomeKit Name</th>
+              <th style="width: 70px; text-align: center;">Expose</th>
+            </tr>
+          </thead>
+          <tbody id="partitionsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="c4-section-label" style="margin-top: 16px;">Zones (<span id="zoneCount">0</span>)</div>
+      <div class="c4-table-wrap">
+        <table class="c4-table">
+          <thead>
+            <tr>
+              <th style="width: 55px;">Zone #</th>
+              <th>Panel Name</th>
+              <th style="width: 55px;">Part</th>
+              <th>Group &amp; Type</th>
+              <th>Live Status</th>
+              <th style="width: 165px;">HomeKit Sensor Type</th>
+              <th>Custom HomeKit Name</th>
+              <th style="width: 70px; text-align: center;">Expose</th>
+            </tr>
+          </thead>
+          <tbody id="zonesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let currentConfigBlocks = [];
+      let latestSnapshot = null;
+
+      // Top form elements
+      const cfgName = document.getElementById('cfgName');
+      const cfgConnectionType = document.getElementById('cfgConnectionType');
+      const serialFields = document.getElementById('serialFields');
+      const tcpFields = document.getElementById('tcpFields');
+      const cfgSerialPort = document.getElementById('cfgSerialPort');
+      const serialPortList = document.getElementById('serialPortList');
+      const cfgBaudRate = document.getElementById('cfgBaudRate');
+      const cfgTcpHost = document.getElementById('cfgTcpHost');
+      const cfgTcpPort = document.getElementById('cfgTcpPort');
+      const cfgPinCode = document.getElementById('cfgPinCode');
+      const cfgUsePinForArming = document.getElementById('cfgUsePinForArming');
+      const cfgAutoDiscoverZones = document.getElementById('cfgAutoDiscoverZones');
+      const cfgDebugProtocol = document.getElementById('cfgDebugProtocol');
+
+      // Equipment elements
+      const connBadge = document.getElementById('connBadge');
+      const connMeta = document.getElementById('connMeta');
+      const emptyState = document.getElementById('emptyState');
+      const equipmentContent = document.getElementById('equipmentContent');
+      const partitionCountEl = document.getElementById('partitionCount');
+      const zoneCountEl = document.getElementById('zoneCount');
+      const partitionsBody = document.getElementById('partitionsBody');
+      const zonesBody = document.getElementById('zonesBody');
+      const refreshBtn = document.getElementById('refreshBtn');
+
+      function getConfig() {
+        if (!currentConfigBlocks.length) {
+          currentConfigBlocks.push({
+            platform: 'Concord4Alarm',
+            name: 'Concord 4 Alarm',
+            connectionType: 'serial',
+            baudRate: 9600,
+            tcpPort: 2000,
+            usePinForArming: false,
+            autoDiscoverZones: true,
+            debugProtocol: false,
+            partitions: [],
+            zones: [],
+          });
+        }
+        return currentConfigBlocks[0];
+      }
+
+      async function pushConfigUpdate() {
+        await window.homebridge.updatePluginConfig(currentConfigBlocks);
+      }
+
+      function toggleConnectionTypeFields() {
+        const isTcp = cfgConnectionType.value === 'tcp';
+        serialFields.style.display = isTcp ? 'none' : 'grid';
+        tcpFields.style.display = isTcp ? 'grid' : 'none';
+        window.homebridge.fixScrollHeight();
+      }
+
+      function populateFormFromConfig() {
+        const cfg = getConfig();
+        cfgName.value = cfg.name || 'Concord 4 Alarm';
+        cfgConnectionType.value = cfg.connectionType || 'serial';
+        cfgSerialPort.value = cfg.serialPort || '';
+        cfgBaudRate.value = cfg.baudRate || 9600;
+        cfgTcpHost.value = cfg.tcpHost || '';
+        cfgTcpPort.value = cfg.tcpPort || 2000;
+        cfgPinCode.value = cfg.pinCode || '';
+        cfgUsePinForArming.checked = Boolean(cfg.usePinForArming);
+        cfgAutoDiscoverZones.checked = cfg.autoDiscoverZones !== false;
+        cfgDebugProtocol.checked = Boolean(cfg.debugProtocol);
+        toggleConnectionTypeFields();
+      }
+
+      async function syncFormToConfig() {
+        const cfg = getConfig();
+        cfg.platform = 'Concord4Alarm';
+        cfg.name = cfgName.value.trim() || 'Concord 4 Alarm';
+        cfg.connectionType = cfgConnectionType.value;
+
+        if (cfgSerialPort.value.trim()) {
+          cfg.serialPort = cfgSerialPort.value.trim();
+        } else {
+          delete cfg.serialPort;
+        }
+
+        const baud = parseInt(cfgBaudRate.value, 10);
+        cfg.baudRate = !isNaN(baud) && baud > 0 ? baud : 9600;
+
+        if (cfgTcpHost.value.trim()) {
+          cfg.tcpHost = cfgTcpHost.value.trim();
+        } else {
+          delete cfg.tcpHost;
+        }
+
+        const port = parseInt(cfgTcpPort.value, 10);
+        cfg.tcpPort = !isNaN(port) && port > 0 ? port : 2000;
+
+        if (cfgPinCode.value.trim()) {
+          cfg.pinCode = cfgPinCode.value.trim();
+        } else {
+          delete cfg.pinCode;
+        }
+
+        cfg.usePinForArming = cfgUsePinForArming.checked;
+        cfg.autoDiscoverZones = cfgAutoDiscoverZones.checked;
+        cfg.debugProtocol = cfgDebugProtocol.checked;
+
+        toggleConnectionTypeFields();
+        await pushConfigUpdate();
+      }
+
+      [
+        cfgName,
+        cfgConnectionType,
+        cfgSerialPort,
+        cfgBaudRate,
+        cfgTcpHost,
+        cfgTcpPort,
+        cfgPinCode,
+        cfgUsePinForArming,
+        cfgAutoDiscoverZones,
+        cfgDebugProtocol,
+      ].forEach((el) => {
+        el.addEventListener('change', syncFormToConfig);
+        if (el.tagName === 'INPUT' && el.type !== 'checkbox') {
+          el.addEventListener('input', syncFormToConfig);
+        }
+      });
+
+      function formatSensorLabel(type) {
+        const labels = {
+          contact: 'Contact (Door/Window)',
+          motion: 'Motion',
+          smoke: 'Smoke',
+          co: 'Carbon Monoxide (CO)',
+          leak: 'Leak / Water',
+        };
+        return labels[type] || type;
+      }
+
+      function renderZoneBadge(zone) {
+        if (zone.alarm) {
+          return '<span class="c4-badge c4-badge-danger">ALARM</span>';
+        }
+        if (zone.faulted || zone.trouble) {
+          return '<span class="c4-badge c4-badge-warn">Fault / Trouble</span>';
+        }
+        if (zone.bypassed) {
+          return '<span class="c4-badge c4-badge-info">Bypassed</span>';
+        }
+        if (zone.tripped) {
+          return '<span class="c4-badge c4-badge-warn">Open / Tripped</span>';
+        }
+        return '<span class="c4-badge c4-badge-ok">Normal</span>';
+      }
+
+      function renderPartitionBadge(part) {
+        if (part.inAlarm) {
+          return '<span class="c4-badge c4-badge-danger">ALARM</span>';
+        }
+        if (part.inTrouble) {
+          return '<span class="c4-badge c4-badge-warn">' + part.armingLevelLabel + ' (Trouble)</span>';
+        }
+        if (part.armingLevel === 1) {
+          return '<span class="c4-badge c4-badge-ok">' + part.armingLevelLabel + '</span>';
+        }
+        return '<span class="c4-badge c4-badge-info">' + part.armingLevelLabel + '</span>';
+      }
+
+      function renderEquipment() {
+        const snapshot = latestSnapshot;
+        if (!snapshot || !snapshot.found || (!snapshot.partitions.length && !snapshot.zones.length)) {
+          connBadge.className = 'c4-badge c4-badge-warn';
+          connBadge.textContent = 'Awaiting Sync';
+          connMeta.textContent = 'No discovered equipment cached yet.';
+          emptyState.style.display = 'block';
+          equipmentContent.style.display = 'none';
+          window.homebridge.fixScrollHeight();
+          return;
+        }
+
+        if (snapshot.connected) {
+          connBadge.className = 'c4-badge c4-badge-ok';
+          connBadge.textContent = 'Connected';
+        } else {
+          connBadge.className = 'c4-badge c4-badge-warn';
+          connBadge.textContent = 'Cached (Offline)';
+        }
+
+        const timeStr = snapshot.updatedAt
+          ? new Date(snapshot.updatedAt).toLocaleString()
+          : 'Unknown';
+        connMeta.textContent =
+          (snapshot.connectionTarget ? snapshot.connectionTarget + ' · ' : '') +
+          'Last synced: ' +
+          timeStr;
+
+        emptyState.style.display = 'none';
+        equipmentContent.style.display = 'block';
+
+        const cfg = getConfig();
+        const partOverrides = Array.isArray(cfg.partitions) ? cfg.partitions : [];
+        const zoneOverrides = Array.isArray(cfg.zones) ? cfg.zones : [];
+
+        // Render Partitions
+        partitionCountEl.textContent = String(snapshot.partitions.length);
+        partitionsBody.innerHTML = '';
+
+        snapshot.partitions.forEach((part) => {
+          const pCfg = partOverrides.find((p) => p && p.partitionNumber === part.partitionNumber);
+          const isExcluded = pCfg ? Boolean(pCfg.exclude) : !part.exposedInHomeKit;
+          const customName = (pCfg && pCfg.name) || '';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td><strong>#' + part.partitionNumber + '</strong></td>' +
+            '<td>' + part.name + '</td>' +
+            '<td>' + renderPartitionBadge(part) + '</td>' +
+            '<td><input type="text" class="c4-input part-name-input" placeholder="' +
+            part.name +
+            '" value="' +
+            customName.replace(/"/g, '&quot;') +
+            '" /></td>' +
+            '<td style="text-align: center;"><input type="checkbox" class="part-expose-chk" ' +
+            (!isExcluded ? 'checked' : '') +
+            ' /></td>';
+
+          const nameInput = tr.querySelector('.part-name-input');
+          const exposeChk = tr.querySelector('.part-expose-chk');
+
+          const updatePartitionRow = async () => {
+            if (!Array.isArray(cfg.partitions)) {
+              cfg.partitions = [];
+            }
+            let entry = cfg.partitions.find((p) => p && p.partitionNumber === part.partitionNumber);
+            if (!entry) {
+              entry = { partitionNumber: part.partitionNumber };
+              cfg.partitions.push(entry);
+            }
+            const trimmed = nameInput.value.trim();
+            if (trimmed) {
+              entry.name = trimmed;
+            } else {
+              delete entry.name;
+            }
+            entry.exclude = !exposeChk.checked;
+            await pushConfigUpdate();
+          };
+
+          nameInput.addEventListener('change', updatePartitionRow);
+          exposeChk.addEventListener('change', updatePartitionRow);
+
+          partitionsBody.appendChild(tr);
+        });
+
+        // Render Zones
+        zoneCountEl.textContent = String(snapshot.zones.length);
+        zonesBody.innerHTML = '';
+
+        snapshot.zones.forEach((zone) => {
+          const zCfg = zoneOverrides.find((z) => z && z.zoneNumber === zone.zoneNumber);
+          const selectedType = (zCfg && zCfg.sensorType) || 'auto';
+          const isExcluded = zCfg ? Boolean(zCfg.exclude) : !zone.exposedInHomeKit;
+          const customName = (zCfg && zCfg.name) || '';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td><strong>#' + zone.zoneNumber + '</strong></td>' +
+            '<td>' + zone.name + '</td>' +
+            '<td>P' + zone.partitionNumber + '</td>' +
+            '<td>Group ' + zone.groupNumber + ' · ' + zone.zoneTypeLabel + '</td>' +
+            '<td>' + renderZoneBadge(zone) + '</td>' +
+            '<td>' +
+            '<select class="c4-select zone-type-select">' +
+            '<option value="auto"' + (selectedType === 'auto' ? ' selected' : '') + '>Auto (' + formatSensorLabel(zone.inferredSensorType) + ')</option>' +
+            '<option value="contact"' + (selectedType === 'contact' ? ' selected' : '') + '>Contact (Door/Window)</option>' +
+            '<option value="motion"' + (selectedType === 'motion' ? ' selected' : '') + '>Motion Sensor</option>' +
+            '<option value="smoke"' + (selectedType === 'smoke' ? ' selected' : '') + '>Smoke Sensor</option>' +
+            '<option value="co"' + (selectedType === 'co' ? ' selected' : '') + '>CO Sensor</option>' +
+            '<option value="leak"' + (selectedType === 'leak' ? ' selected' : '') + '>Leak / Water Sensor</option>' +
+            '</select>' +
+            '</td>' +
+            '<td><input type="text" class="c4-input zone-name-input" placeholder="' +
+            zone.name.replace(/"/g, '&quot;') +
+            '" value="' +
+            customName.replace(/"/g, '&quot;') +
+            '" /></td>' +
+            '<td style="text-align: center;"><input type="checkbox" class="zone-expose-chk" ' +
+            (!isExcluded ? 'checked' : '') +
+            ' /></td>';
+
+          const typeSelect = tr.querySelector('.zone-type-select');
+          const nameInput = tr.querySelector('.zone-name-input');
+          const exposeChk = tr.querySelector('.zone-expose-chk');
+
+          const updateZoneRow = async () => {
+            if (!Array.isArray(cfg.zones)) {
+              cfg.zones = [];
+            }
+            cfg.zones = cfg.zones.filter((z) => z && typeof z.zoneNumber === 'number');
+
+            let entry = cfg.zones.find((z) => z.zoneNumber === zone.zoneNumber);
+            if (!entry) {
+              entry = { zoneNumber: zone.zoneNumber };
+              cfg.zones.push(entry);
+              cfg.zones.sort((a, b) => a.zoneNumber - b.zoneNumber);
+            }
+            const trimmed = nameInput.value.trim();
+            if (trimmed) {
+              entry.name = trimmed;
+            } else {
+              delete entry.name;
+            }
+            entry.sensorType = typeSelect.value;
+            entry.exclude = !exposeChk.checked;
+            await pushConfigUpdate();
+          };
+
+          typeSelect.addEventListener('change', updateZoneRow);
+          nameInput.addEventListener('change', updateZoneRow);
+          exposeChk.addEventListener('change', updateZoneRow);
+
+          zonesBody.appendChild(tr);
+        });
+
+        window.homebridge.fixScrollHeight();
+      }
+
+      async function loadSerialPorts() {
+        try {
+          const ports = await window.homebridge.request('/serial-ports');
+          if (Array.isArray(ports) && ports.length > 0) {
+            serialPortList.innerHTML = '';
+            ports.forEach((p) => {
+              const opt = document.createElement('option');
+              opt.value = p.path;
+              if (p.manufacturer) {
+                opt.label = p.path + ' (' + p.manufacturer + ')';
+              }
+              serialPortList.appendChild(opt);
+            });
+          }
+        } catch {
+          // Ignore serial port list errors
+        }
+      }
+
+      async function init() {
+        try {
+          currentConfigBlocks = await window.homebridge.getPluginConfig();
+          // Clean up any blank placeholder zone entries from earlier schema runs
+          const cfg = getConfig();
+          if (Array.isArray(cfg.zones)) {
+            cfg.zones = cfg.zones.filter((z) => z && typeof z.zoneNumber === 'number');
+          }
+          populateFormFromConfig();
+          await pushConfigUpdate();
+        } catch {
+          // Ignore init error
+        }
+
+        loadSerialPorts();
+        await loadEquipment();
+      }
+
+      async function loadEquipment() {
+        try {
+          latestSnapshot = await window.homebridge.request('/equipment');
+          renderEquipment();
+        } catch (err) {
+          connBadge.className = 'c4-badge c4-badge-danger';
+          connBadge.textContent = 'Error';
+          connMeta.textContent = 'Failed to load equipment snapshot: ' + (err.message || err);
+        }
+      }
+
+      refreshBtn.addEventListener('click', () => {
+        loadEquipment();
+      });
+
+      init();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "homebridge-concord4",
+  "version": "1.0.0",
+  "description": "Native Homebridge plugin for GE / Interlogix Concord 4 alarm panels via the SuperBus 2000 RS-232 Automation Module",
+  "license": "Apache-2.0",
+  "keywords": [
+    "homebridge-plugin",
+    "homekit",
+    "concord",
+    "concord4",
+    "concord232",
+    "interlogix",
+    "ge-security",
+    "alarm",
+    "rs232"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "homebridge-ui",
+    "config.schema.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "^18.18.0 || ^20.9.0 || >=22.0.0",
+    "homebridge": "^1.6.0 || ^2.0.0-beta.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "watch": "tsc -w",
+    "test": "rm -rf dist-test && tsc -p tsconfig.test.json && node --test dist-test/test/*.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@homebridge/plugin-ui-utils": "^2.2.6",
+    "serialport": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "homebridge": "^1.8.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "pluginAlias": "Concord4Alarm",
+  "pluginType": "platform",
+  "singular": true,
+  "customUi": true,
+  "customUiPath": "./homebridge-ui",
+  "headerDisplay": "Connect your GE / Interlogix Concord 4 alarm panel to HomeKit via the SuperBus 2000 RS-232 Automation Module.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Platform Name",
+        "type": "string",
+        "default": "Concord 4 Alarm",
+        "required": true
+      },
+      "connectionType": {
+        "title": "Connection Type",
+        "type": "string",
+        "default": "serial",
+        "oneOf": [
+          {
+            "title": "Local Serial Port (USB / RS-232)",
+            "enum": [
+              "serial"
+            ]
+          },
+          {
+            "title": "Network TCP Socket (ser2net / IP-to-Serial)",
+            "enum": [
+              "tcp"
+            ]
+          }
+        ],
+        "required": true
+      },
+      "serialPort": {
+        "title": "Serial Port Path",
+        "type": "string",
+        "placeholder": "/dev/tty.usbserial-AB0N4F64",
+        "description": "Path to the RS-232 serial device (e.g., /dev/ttyUSB0 or /dev/tty.usbserial-xxxx).",
+        "condition": {
+          "functionBody": "return model.connectionType === 'serial';"
+        }
+      },
+      "baudRate": {
+        "title": "Baud Rate",
+        "type": "integer",
+        "default": 9600,
+        "description": "SuperBus 2000 RS-232 modules operate at 9600 baud (8 data bits, Odd parity, 1 stop bit).",
+        "condition": {
+          "functionBody": "return model.connectionType === 'serial';"
+        }
+      },
+      "tcpHost": {
+        "title": "TCP Host / IP Address",
+        "type": "string",
+        "placeholder": "192.168.1.50",
+        "description": "Hostname or IP address of the serial-to-IP bridge (e.g., ser2net).",
+        "condition": {
+          "functionBody": "return model.connectionType === 'tcp';"
+        }
+      },
+      "tcpPort": {
+        "title": "TCP Port",
+        "type": "integer",
+        "default": 2000,
+        "minimum": 1,
+        "maximum": 65535,
+        "description": "TCP port of the serial-to-IP bridge.",
+        "condition": {
+          "functionBody": "return model.connectionType === 'tcp';"
+        }
+      },
+      "pinCode": {
+        "title": "User / Master PIN Code (Optional)",
+        "type": "string",
+        "placeholder": "1234",
+        "pattern": "^([0-9]{4,6})?$",
+        "description": "Optional 4-digit PIN code. If provided and 'Use PIN for Disarm/Arm' is enabled, keypress sequences use this PIN instead of virtual keyfob commands."
+      },
+      "usePinForArming": {
+        "title": "Use PIN Code Instead of Keyfob Commands",
+        "type": "boolean",
+        "default": false,
+        "description": "When false (default), the plugin uses Concord's direct Keyfob Arm/Disarm commands (0x20, 0x27, 0x28). Enable if your panel requires a PIN sequence for disarming."
+      },
+      "autoDiscoverZones": {
+        "title": "Auto-Discover Zones",
+        "type": "boolean",
+        "default": true,
+        "description": "Automatically expose panel zones and infer their HomeKit sensor type from the panel's zone group and name."
+      },
+      "debugProtocol": {
+        "title": "Log Raw RS-232 Frames (Debug)",
+        "type": "boolean",
+        "default": false,
+        "description": "Log raw hex frames sent and received over the RS-232 interface."
+      },
+      "partitions": {
+        "type": "array",
+        "default": [],
+        "items": {
+          "type": "object",
+          "properties": {
+            "partitionNumber": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "exclude": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "zones": {
+        "type": "array",
+        "default": [],
+        "items": {
+          "type": "object",
+          "properties": {
+            "zoneNumber": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "sensorType": {
+              "type": "string"
+            },
+            "exclude": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    "name",
+    "connectionType",
+    "serialPort",
+    "baudRate",
+    "tcpHost",
+    "tcpPort",
+    "pinCode",
+    "usePinForArming",
+    "autoDiscoverZones",
+    "debugProtocol"
+  ]
+}
