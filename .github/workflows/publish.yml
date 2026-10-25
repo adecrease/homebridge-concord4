@@ -1,0 +1,68 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and run tests
+        run: |
+          npm run build
+          npm test
+
+      - name: Determine version and publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not set. Add an npm Automation Token as repository secret NPM_TOKEN in GitHub Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          PKG_NAME=$(node -p "require('./package.json').name")
+          LOCAL_VER=$(node -p "require('./package.json').version")
+          NPM_VER=$(npm view "$PKG_NAME" version 2>/dev/null || echo "")
+
+          echo "Package: $PKG_NAME | package.json version: $LOCAL_VER | npm latest: ${NPM_VER:-none}"
+
+          if [ -n "$NPM_VER" ]; then
+            # If the version in package.json is <= the latest version on npm, auto-bump patch from npm latest
+            NEEDS_BUMP=$(node -e "
+              const [lMaj, lMin, lPat] = '$LOCAL_VER'.split('.').map(Number);
+              const [nMaj, nMin, nPat] = '$NPM_VER'.split('.').map(Number);
+              const lScore = lMaj * 1e6 + lMin * 1e3 + lPat;
+              const nScore = nMaj * 1e6 + nMin * 1e3 + nPat;
+              process.stdout.write(lScore <= nScore ? 'yes' : 'no');
+            ")
+            if [ "$NEEDS_BUMP" = "yes" ]; then
+              NEXT_VER=$(node -e "
+                const [maj, min, pat] = '$NPM_VER'.split('.').map(Number);
+                process.stdout.write(\`\${maj}.\${min}.\${pat + 1}\`);
+              ")
+              echo "Auto-bumping version to $NEXT_VER for npm publish..."
+              npm version "$NEXT_VER" --no-git-tag-version
+            fi
+          fi
+
+          npm publish --access public

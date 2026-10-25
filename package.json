@@ -2,7 +2,16 @@
   "name": "homebridge-concord4",
   "version": "1.0.0",
   "description": "Native Homebridge plugin for GE / Interlogix Concord 4 alarm panels via the SuperBus 2000 RS-232 Automation Module",
+  "author": "adecrease",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adecrease/homebridge-concord4.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adecrease/homebridge-concord4/issues"
+  },
+  "homepage": "https://github.com/adecrease/homebridge-concord4#readme",
   "keywords": [
     "homebridge-plugin",
     "homekit",
