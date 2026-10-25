@@ -263,12 +263,10 @@ export class ConcordClient extends EventEmitter {
       this.logger.info('Connected to Concord RS-232 interface. Syncing equipment and state...');
       this.emit('connected');
 
-      // Request full equipment list followed by dynamic data refresh
+      // Request full equipment list first; Dynamic Data Refresh (0x20) is requested
+      // once the panel finishes streaming and sends Equipment List Complete (0x08).
       this.requestEquipmentList().catch((err) => {
         this.logger.warn(`Initial Equipment List request failed: ${err.message}`);
-      });
-      this.requestDynamicDataRefresh().catch((err) => {
-        this.logger.warn(`Initial Dynamic Data Refresh failed: ${err.message}`);
       });
     });
 
@@ -450,9 +448,12 @@ export class ConcordClient extends EventEmitter {
           this.ensurePartition(1);
         }
         this.logger.info(
-          `Equipment list sync complete: ${this.partitions.size} partition(s), ${this.zones.size} zone(s).`,
+          `Equipment list sync complete: ${this.partitions.size} partition(s), ${this.zones.size} zone(s). Requesting Dynamic Data Refresh (0x20)...`,
         );
         this.emit('equipmentListComplete');
+        this.requestDynamicDataRefresh().catch((err) => {
+          this.logger.warn(`Dynamic Data Refresh after Equipment List failed: ${err.message}`);
+        });
         break;
       }
 

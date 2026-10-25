@@ -145,13 +145,9 @@ export class ConcordFrameParser {
       }
 
       if (byte === CONTROL_LF) {
-        // If a previous incomplete frame was buffered, emit it as invalid for diagnostics before resetting
-        if (this.inFrame && this.currentHex.length > 0) {
-          tokens.push({
-            type: 'frame',
-            frame: decodeHexFrame(this.currentHex),
-          });
-        }
+        // A new 0x0A (LF) start-of-message byte always starts a fresh frame.
+        // Do not emit a NAK-triggering invalid frame for any superseded partial buffer,
+        // because the panel is already transmitting the new frame.
         this.inFrame = true;
         this.currentHex = '';
         this.expectedHexLength = null;
