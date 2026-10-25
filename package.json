@@ -31,6 +31,7 @@
     "build": "rm -rf dist && tsc",
     "watch": "tsc -w",
     "test": "rm -rf dist-test && tsc -p tsconfig.test.json && node --test dist-test/test/*.test.js",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
